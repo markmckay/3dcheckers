@@ -45,7 +45,7 @@ export default function CheckersGame() {
         
         // Initialize scene
         console.log('🎮 [CheckersGame] Initializing scene...');
-        const { scene, camera, renderer, controls } = await initializeScene(mountRef.current);
+        const { scene, camera, renderer, controls } = initializeScene(mountRef.current);
         
         console.log('🎮 [CheckersGame] Scene initialized, setting refs...');
         sceneRef.current = scene;
@@ -84,9 +84,7 @@ export default function CheckersGame() {
         const animate = () => {
           animationIdRef.current = requestAnimationFrame(animate);
           
-          if (controls) {
-            controls.update();
-          }
+          // Controls update removed for now
           
           if (renderer && scene && camera) {
             renderer.render(scene, camera);

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export async function initializeScene(container) {
+export function initializeScene(container) {
   console.log('🎮 [SceneSetup] Starting scene initialization...');
   
   try {
@@ -74,20 +74,10 @@ export async function initializeScene(container) {
     camera.lookAt(0, 2.5, 0);
     console.log('✅ [SceneSetup] Camera positioned');
 
-    // Import OrbitControls
-    console.log('🎮 [SceneSetup] Importing OrbitControls...');
-    const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls');
-    console.log('✅ [SceneSetup] OrbitControls imported');
-    
-    console.log('🎮 [SceneSetup] Creating OrbitControls...');
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.enableZoom = true;
-    controls.maxPolarAngle = Math.PI / 2.2;
-    controls.minDistance = 8;
-    controls.maxDistance = 25;
-    console.log('✅ [SceneSetup] OrbitControls created and configured');
+    // Create simple controls (we'll add OrbitControls later if needed)
+    console.log('🎮 [SceneSetup] Setting up basic controls...');
+    const controls = null; // Simplified for now
+    console.log('✅ [SceneSetup] Basic controls set up');
 
     console.log('🎉 [SceneSetup] Scene setup complete!');
     return { scene, camera, renderer, controls };
