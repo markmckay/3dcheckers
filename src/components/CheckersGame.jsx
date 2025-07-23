@@ -29,29 +29,37 @@ export default function CheckersGame() {
     if (!mountRef.current) return;
 
     const initGame = async () => {
+      console.log('Starting game initialization...');
       try {
         // Initialize scene
+        console.log('Initializing scene...');
         const { scene, camera, renderer, controls } = await initializeScene(mountRef.current);
         
+        console.log('Scene initialized, setting refs...');
         sceneRef.current = scene;
         cameraRef.current = camera;
         rendererRef.current = renderer;
         controlsRef.current = controls;
 
         // Create boards
+        console.log('Creating boards...');
         createBoards(scene);
 
         // Initialize pieces
+        console.log('Initializing pieces...');
         const initialPieces = initializePieces();
         setPieces(initialPieces);
         
         // Create 3D pieces
+        console.log('Creating 3D pieces...');
         createPieces(scene, initialPieces);
 
         // Set up mouse events
+        console.log('Setting up mouse events...');
         handleMouseEvents(camera, scene, renderer, gameState, setGameState, pieces, setPieces);
 
         // Animation loop
+        console.log('Starting animation loop...');
         const animate = () => {
           animationIdRef.current = requestAnimationFrame(animate);
           controls.update();
@@ -67,6 +75,7 @@ export default function CheckersGame() {
         };
         window.addEventListener('resize', handleResize);
 
+        console.log('Game initialization complete!');
         setLoading(false);
 
         return () => {
@@ -77,6 +86,7 @@ export default function CheckersGame() {
         };
       } catch (error) {
         console.error('Error initializing game:', error);
+        console.error('Error stack:', error.stack);
         setLoading(false);
       }
     };

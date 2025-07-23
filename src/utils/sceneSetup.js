@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 
 export async function initializeScene(container) {
+  console.log('Creating scene...');
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
 
+  console.log('Creating camera...');
   const camera = new THREE.PerspectiveCamera(
     75, 
     window.innerWidth / window.innerHeight, 
@@ -11,15 +13,18 @@ export async function initializeScene(container) {
     1000
   );
 
+  console.log('Creating renderer...');
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.setClearColor(0x1a1a2e);
   
+  console.log('Appending renderer to container...');
   container.appendChild(renderer.domElement);
 
   // Lighting setup
+  console.log('Setting up lighting...');
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambientLight);
 
@@ -50,11 +55,14 @@ export async function initializeScene(container) {
   scene.add(pointLight2);
 
   // Camera position
+  console.log('Setting camera position...');
   camera.position.set(0, 12, 15);
   camera.lookAt(0, 2.5, 0);
 
   // Import OrbitControls synchronously
+  console.log('Importing OrbitControls...');
   const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls');
+  console.log('Creating OrbitControls...');
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
@@ -63,5 +71,6 @@ export async function initializeScene(container) {
   controls.minDistance = 8;
   controls.maxDistance = 25;
 
+  console.log('Scene setup complete!');
   return { scene, camera, renderer, controls };
 }
