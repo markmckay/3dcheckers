@@ -31,7 +31,7 @@ export default function CheckersGame() {
     const initGame = async () => {
       try {
         // Initialize scene
-        const { scene, camera, renderer, controls } = initializeScene(mountRef.current);
+        const { scene, camera, renderer, controls } = await initializeScene(mountRef.current);
         
         sceneRef.current = scene;
         cameraRef.current = camera;

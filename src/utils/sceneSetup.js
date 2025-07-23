@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export function initializeScene(container) {
+export async function initializeScene(container) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
 
@@ -53,16 +53,15 @@ export function initializeScene(container) {
   camera.position.set(0, 12, 15);
   camera.lookAt(0, 2.5, 0);
 
-  // Import OrbitControls dynamically
-  import('three/examples/jsm/controls/OrbitControls').then(({ OrbitControls }) => {
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.enableZoom = true;
-    controls.maxPolarAngle = Math.PI / 2.2;
-    controls.minDistance = 8;
-    controls.maxDistance = 25;
-  });
+  // Import OrbitControls synchronously
+  const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls');
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.enableZoom = true;
+  controls.maxPolarAngle = Math.PI / 2.2;
+  controls.minDistance = 8;
+  controls.maxDistance = 25;
 
-  return { scene, camera, renderer, controls: null };
+  return { scene, camera, renderer, controls };
 }
