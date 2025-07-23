@@ -1,4 +1,4 @@
-import * * THREE from 'three';
+import * as THREE from 'three';
 
 export function initializePieces() {
   const pieces = [];
