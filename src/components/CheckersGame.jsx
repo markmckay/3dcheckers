@@ -37,34 +37,41 @@ export default function CheckersGame() {
       return;
     }
 
-    const initGame = async () => {
+    const initGame = () => {
       console.log('🎮 [CheckersGame] Starting game initialization...');
       
       try {
         setError(null);
+        console.log('🎮 [CheckersGame] Error state cleared');
         
         // Initialize scene
         console.log('🎮 [CheckersGame] Initializing scene...');
         const { scene, camera, renderer, controls } = initializeScene(mountRef.current);
+        console.log('🎮 [CheckersGame] Scene initialization returned:', { scene: !!scene, camera: !!camera, renderer: !!renderer });
         
         console.log('🎮 [CheckersGame] Scene initialized, setting refs...');
         sceneRef.current = scene;
         cameraRef.current = camera;
         rendererRef.current = renderer;
         controlsRef.current = controls;
+        console.log('🎮 [CheckersGame] Refs set successfully');
 
         // Create boards
         console.log('🎮 [CheckersGame] Creating boards...');
         createBoards(scene);
+        console.log('🎮 [CheckersGame] Boards created successfully');
 
         // Initialize pieces
         console.log('🎮 [CheckersGame] Initializing pieces...');
         const initialPieces = initializePieces();
+        console.log('🎮 [CheckersGame] Pieces initialized:', initialPieces.length);
         setPieces(initialPieces);
+        console.log('🎮 [CheckersGame] Pieces state set');
         
         // Create 3D pieces
         console.log('🎮 [CheckersGame] Creating 3D pieces...');
         createPieces(scene, initialPieces);
+        console.log('🎮 [CheckersGame] 3D pieces created successfully');
 
         // Set up mouse events
         console.log('🎮 [CheckersGame] Setting up mouse events...');
@@ -78,6 +85,7 @@ export default function CheckersGame() {
           setPieces
         );
         cleanupMouseEventsRef.current = cleanupMouseEvents;
+        console.log('🎮 [CheckersGame] Mouse events set up successfully');
 
         // Animation loop
         console.log('🎮 [CheckersGame] Starting animation loop...');
@@ -91,6 +99,7 @@ export default function CheckersGame() {
           }
         };
         animate();
+        console.log('🎮 [CheckersGame] Animation loop started');
 
         // Handle window resize
         const handleResize = () => {
@@ -102,9 +111,12 @@ export default function CheckersGame() {
           }
         };
         window.addEventListener('resize', handleResize);
+        console.log('🎮 [CheckersGame] Resize handler added');
 
         console.log('🎉 [CheckersGame] Game initialization complete!');
+        console.log('🎮 [CheckersGame] Setting loading to false...');
         setLoading(false);
+        console.log('🎮 [CheckersGame] Loading state updated');
 
         return () => {
           console.log('🎮 [CheckersGame] Cleaning up resize listener...');
@@ -114,12 +126,20 @@ export default function CheckersGame() {
       } catch (error) {
         console.error('❌ [CheckersGame] Error initializing game:', error);
         console.error('❌ [CheckersGame] Error stack:', error.stack);
+        console.error('❌ [CheckersGame] Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
         setError(error.message);
         setLoading(false);
+        console.log('❌ [CheckersGame] Error state set, loading set to false');
       }
     };
 
+    console.log('🎮 [CheckersGame] About to call initGame...');
     initGame();
+    console.log('🎮 [CheckersGame] initGame called');
 
     return () => {
       console.log('🎮 [CheckersGame] Component cleanup...');
