@@ -1,50 +1,72 @@
 import * as THREE from 'three';
 
 export function initializePieces() {
+  console.log('♟️ [PieceCreation] Initializing pieces...');
+  
   const pieces = [];
   
   // Red pieces on lower board (rows 0-2)
+  console.log('♟️ [PieceCreation] Creating red pieces on lower board...');
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 8; col++) {
       if ((row + col) % 2 === 1) { // Only on dark squares
-        pieces.push({
+        const piece = {
           id: `red_${row}_${col}`,
           color: 'red',
           position: { row, col, board: 'lower' },
           isKing: false,
           mesh: null
-        });
+        };
+        pieces.push(piece);
+        console.log(`♟️ [PieceCreation] Created red piece at [${row}, ${col}] on lower board`);
       }
     }
   }
   
   // Black pieces on upper board (rows 5-7)
+  console.log('♟️ [PieceCreation] Creating black pieces on upper board...');
   for (let row = 5; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       if ((row + col) % 2 === 1) { // Only on dark squares
-        pieces.push({
+        const piece = {
           id: `black_${row}_${col}`,
           color: 'black',
           position: { row, col, board: 'upper' },
           isKing: false,
           mesh: null
-        });
+        };
+        pieces.push(piece);
+        console.log(`♟️ [PieceCreation] Created black piece at [${row}, ${col}] on upper board`);
       }
     }
   }
   
+  console.log(`🎉 [PieceCreation] Piece initialization complete! Created ${pieces.length} pieces`);
   return pieces;
 }
 
 export function createPieces(scene, pieces) {
-  pieces.forEach(piece => {
-    const mesh = createPieceMesh(piece);
-    piece.mesh = mesh;
-    scene.add(mesh);
-  });
+  console.log(`♟️ [PieceCreation] Creating 3D meshes for ${pieces.length} pieces...`);
+  
+  try {
+    pieces.forEach((piece, index) => {
+      console.log(`♟️ [PieceCreation] Creating mesh for piece ${index + 1}/${pieces.length}: ${piece.id}`);
+      const mesh = createPieceMesh(piece);
+      piece.mesh = mesh;
+      scene.add(mesh);
+      console.log(`✅ [PieceCreation] Added ${piece.color} piece to scene at position [${piece.position.row}, ${piece.position.col}] on ${piece.position.board} board`);
+    });
+    
+    console.log('🎉 [PieceCreation] All piece meshes created and added to scene!');
+  } catch (error) {
+    console.error('❌ [PieceCreation] Error creating pieces:', error);
+    throw error;
+  }
 }
 
 function createPieceMesh(piece) {
+  console.log(`♟️ [PieceCreation] Creating mesh for ${piece.color} piece ${piece.id}...`);
+  
   const group = new THREE.Group();
   
   // Main piece body
@@ -92,13 +114,17 @@ function createPieceMesh(piece) {
   
   // Add king crown if needed
   if (piece.isKing) {
+    console.log(`♟️ [PieceCreation] Adding king crown to ${piece.id}...`);
     addKingCrown(group, piece.color);
   }
   
+  console.log(`✅ [PieceCreation] Mesh created for ${piece.color} piece at [${piece.position.row}, ${piece.position.col}]`);
   return group;
 }
 
 function addKingCrown(pieceGroup, color) {
+  console.log(`👑 [PieceCreation] Adding crown to ${color} piece...`);
+  
   const crownGeometry = new THREE.ConeGeometry(0.2, 0.3, 8);
   const crownMaterial = new THREE.MeshStandardMaterial({ 
     color: color === 'red' ? 0xffd700 : 0xc0c0c0,
@@ -130,4 +156,6 @@ function addKingCrown(pieceGroup, color) {
     gem.castShadow = true;
     pieceGroup.add(gem);
   }
+  
+  console.log(`✅ [PieceCreation] Crown added to ${color} piece`);
 }

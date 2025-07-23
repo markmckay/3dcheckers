@@ -1,15 +1,33 @@
 import * as THREE from 'three';
 
 export function createBoards(scene) {
-  // Create two boards - one at y=0 and one at y=5
-  createSingleBoard(scene, 0, 'lower');
-  createSingleBoard(scene, 5, 'upper');
+  console.log('🏁 [BoardCreation] Starting board creation...');
   
-  // Create connecting pillars
-  createConnectingPillars(scene);
+  try {
+    // Create two boards - one at y=0 and one at y=5
+    console.log('🏁 [BoardCreation] Creating lower board...');
+    createSingleBoard(scene, 0, 'lower');
+    console.log('✅ [BoardCreation] Lower board created');
+    
+    console.log('🏁 [BoardCreation] Creating upper board...');
+    createSingleBoard(scene, 5, 'upper');
+    console.log('✅ [BoardCreation] Upper board created');
+    
+    // Create connecting pillars
+    console.log('🏁 [BoardCreation] Creating connecting pillars...');
+    createConnectingPillars(scene);
+    console.log('✅ [BoardCreation] Connecting pillars created');
+    
+    console.log('🎉 [BoardCreation] Board creation complete!');
+  } catch (error) {
+    console.error('❌ [BoardCreation] Error creating boards:', error);
+    throw error;
+  }
 }
 
 function createSingleBoard(scene, yPosition, boardType) {
+  console.log(`🏁 [BoardCreation] Creating ${boardType} board at y=${yPosition}...`);
+  
   const boardGroup = new THREE.Group();
   boardGroup.name = `${boardType}Board`;
   
@@ -27,6 +45,7 @@ function createSingleBoard(scene, yPosition, boardType) {
   boardGroup.add(board);
 
   // Create checkerboard pattern
+  console.log(`🏁 [BoardCreation] Creating checkerboard pattern for ${boardType} board...`);
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       const isLight = (i + j) % 2 === 0;
@@ -57,6 +76,7 @@ function createSingleBoard(scene, yPosition, boardType) {
   }
 
   // Add decorative border
+  console.log(`🏁 [BoardCreation] Adding decorative border for ${boardType} board...`);
   const borderGeometry = new THREE.BoxGeometry(9, 0.4, 0.3);
   const borderMaterial = new THREE.MeshStandardMaterial({ 
     color: 0x4a4a4a,
@@ -82,9 +102,12 @@ function createSingleBoard(scene, yPosition, boardType) {
   });
 
   scene.add(boardGroup);
+  console.log(`✅ [BoardCreation] ${boardType} board added to scene`);
 }
 
 function createConnectingPillars(scene) {
+  console.log('🏁 [BoardCreation] Creating connecting pillars...');
+  
   const pillarGeometry = new THREE.CylinderGeometry(0.15, 0.15, 5);
   const pillarMaterial = new THREE.MeshStandardMaterial({ 
     color: 0x4a4a4a,
@@ -99,11 +122,12 @@ function createConnectingPillars(scene) {
     [-4.5, 2.5, -4.5]
   ];
 
-  pillarPositions.forEach(pos => {
+  pillarPositions.forEach((pos, index) => {
     const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
     pillar.position.set(...pos);
     pillar.castShadow = true;
     pillar.receiveShadow = true;
     scene.add(pillar);
+    console.log(`✅ [BoardCreation] Pillar ${index + 1} created at position [${pos.join(', ')}]`);
   });
 }

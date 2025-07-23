@@ -6,12 +6,15 @@ import { createPieces, initializePieces } from '../utils/pieceCreation';
 import { handleMouseEvents } from '../utils/mouseHandlers';
 
 export default function CheckersGame() {
+  console.log('🎮 [CheckersGame] Component rendering...');
+  
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
   const controlsRef = useRef(null);
   const animationIdRef = useRef(null);
+  const cleanupMouseEventsRef = useRef(null);
   
   const [gameState, setGameState] = useState({
     mode: 'pvp',
@@ -24,69 +27,96 @@ export default function CheckersGame() {
 
   const [pieces, setPieces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    console.log('🎮 [CheckersGame] useEffect triggered - starting initialization...');
+    
+    if (!mountRef.current) {
+      console.log('🎮 [CheckersGame] Mount ref not ready, waiting...');
+      return;
+    }
 
     const initGame = async () => {
-      console.log('Starting game initialization...');
+      console.log('🎮 [CheckersGame] Starting game initialization...');
+      
       try {
+        setError(null);
+        
         // Initialize scene
-        console.log('Initializing scene...');
+        console.log('🎮 [CheckersGame] Initializing scene...');
         const { scene, camera, renderer, controls } = await initializeScene(mountRef.current);
         
-        console.log('Scene initialized, setting refs...');
+        console.log('🎮 [CheckersGame] Scene initialized, setting refs...');
         sceneRef.current = scene;
         cameraRef.current = camera;
         rendererRef.current = renderer;
         controlsRef.current = controls;
 
         // Create boards
-        console.log('Creating boards...');
+        console.log('🎮 [CheckersGame] Creating boards...');
         createBoards(scene);
 
         // Initialize pieces
-        console.log('Initializing pieces...');
+        console.log('🎮 [CheckersGame] Initializing pieces...');
         const initialPieces = initializePieces();
         setPieces(initialPieces);
         
         // Create 3D pieces
-        console.log('Creating 3D pieces...');
+        console.log('🎮 [CheckersGame] Creating 3D pieces...');
         createPieces(scene, initialPieces);
 
         // Set up mouse events
-        console.log('Setting up mouse events...');
-        handleMouseEvents(camera, scene, renderer, gameState, setGameState, pieces, setPieces);
+        console.log('🎮 [CheckersGame] Setting up mouse events...');
+        const cleanupMouseEvents = handleMouseEvents(
+          camera, 
+          scene, 
+          renderer, 
+          gameState, 
+          setGameState, 
+          initialPieces, 
+          setPieces
+        );
+        cleanupMouseEventsRef.current = cleanupMouseEvents;
 
         // Animation loop
-        console.log('Starting animation loop...');
+        console.log('🎮 [CheckersGame] Starting animation loop...');
         const animate = () => {
           animationIdRef.current = requestAnimationFrame(animate);
-          controls.update();
-          renderer.render(scene, camera);
+          
+          if (controls) {
+            controls.update();
+          }
+          
+          if (renderer && scene && camera) {
+            renderer.render(scene, camera);
+          }
         };
         animate();
 
         // Handle window resize
         const handleResize = () => {
-          camera.aspect = window.innerWidth / window.innerHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
+          console.log('🎮 [CheckersGame] Window resized, updating camera and renderer...');
+          if (camera && renderer) {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+          }
         };
         window.addEventListener('resize', handleResize);
 
-        console.log('Game initialization complete!');
+        console.log('🎉 [CheckersGame] Game initialization complete!');
         setLoading(false);
 
         return () => {
+          console.log('🎮 [CheckersGame] Cleaning up resize listener...');
           window.removeEventListener('resize', handleResize);
-          if (animationIdRef.current) {
-            cancelAnimationFrame(animationIdRef.current);
-          }
         };
+        
       } catch (error) {
-        console.error('Error initializing game:', error);
-        console.error('Error stack:', error.stack);
+        console.error('❌ [CheckersGame] Error initializing game:', error);
+        console.error('❌ [CheckersGame] Error stack:', error.stack);
+        setError(error.message);
         setLoading(false);
       }
     };
@@ -94,24 +124,62 @@ export default function CheckersGame() {
     initGame();
 
     return () => {
+      console.log('🎮 [CheckersGame] Component cleanup...');
+      
       if (animationIdRef.current) {
+        console.log('🎮 [CheckersGame] Canceling animation frame...');
         cancelAnimationFrame(animationIdRef.current);
       }
-      if (rendererRef.current && mountRef.current) {
+      
+      if (cleanupMouseEventsRef.current) {
+        console.log('🎮 [CheckersGame] Cleaning up mouse events...');
+        cleanupMouseEventsRef.current();
+      }
+      
+      if (rendererRef.current && mountRef.current && mountRef.current.contains(rendererRef.current.domElement)) {
+        console.log('🎮 [CheckersGame] Removing renderer from DOM...');
         mountRef.current.removeChild(rendererRef.current.domElement);
       }
     };
   }, []);
 
+  // Update mouse handlers when gameState changes
+  useEffect(() => {
+    console.log('🎮 [CheckersGame] Game state changed:', gameState);
+    
+    if (cleanupMouseEventsRef.current && cameraRef.current && sceneRef.current && rendererRef.current) {
+      console.log('🎮 [CheckersGame] Updating mouse handlers with new game state...');
+      
+      // Cleanup old handlers
+      cleanupMouseEventsRef.current();
+      
+      // Setup new handlers with updated game state
+      const cleanupMouseEvents = handleMouseEvents(
+        cameraRef.current, 
+        sceneRef.current, 
+        rendererRef.current, 
+        gameState, 
+        setGameState, 
+        pieces, 
+        setPieces
+      );
+      cleanupMouseEventsRef.current = cleanupMouseEvents;
+    }
+  }, [gameState.currentPlayer, gameState.selectedPiece, pieces]);
+
   const handleGameModeChange = (mode) => {
+    console.log(`🎮 [CheckersGame] Game mode changed to: ${mode}`);
     setGameState(prev => ({ ...prev, mode }));
   };
 
   const handleDifficultyChange = (difficulty) => {
+    console.log(`🎮 [CheckersGame] Difficulty changed to: ${difficulty}`);
     setGameState(prev => ({ ...prev, difficulty }));
   };
 
   const resetGame = () => {
+    console.log('🎮 [CheckersGame] Resetting game...');
+    
     const initialPieces = initializePieces();
     setPieces(initialPieces);
     setGameState(prev => ({ 
@@ -122,6 +190,7 @@ export default function CheckersGame() {
     }));
     
     if (sceneRef.current) {
+      console.log('🎮 [CheckersGame] Removing existing pieces from scene...');
       // Remove existing pieces
       const piecesToRemove = [];
       sceneRef.current.traverse((child) => {
@@ -129,17 +198,45 @@ export default function CheckersGame() {
           piecesToRemove.push(child);
         }
       });
+      
+      console.log(`🎮 [CheckersGame] Found ${piecesToRemove.length} pieces to remove`);
       piecesToRemove.forEach(piece => sceneRef.current.remove(piece));
       
       // Create new pieces
+      console.log('🎮 [CheckersGame] Creating new pieces...');
       createPieces(sceneRef.current, initialPieces);
     }
+    
+    console.log('✅ [CheckersGame] Game reset complete');
   };
 
+  if (error) {
+    console.error('❌ [CheckersGame] Rendering error state:', error);
+    return (
+      <div style={{ 
+        position: 'absolute', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)',
+        color: 'white',
+        textAlign: 'center',
+        background: 'rgba(255, 0, 0, 0.8)',
+        padding: '20px',
+        borderRadius: '10px'
+      }}>
+        <h2>Error Loading Game</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Reload Page</button>
+      </div>
+    );
+  }
+
   if (loading) {
+    console.log('🎮 [CheckersGame] Rendering loading state...');
     return <div className="loading">Loading 3D Checkers...</div>;
   }
 
+  console.log('🎮 [CheckersGame] Rendering game interface...');
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       <div className="game-ui">
@@ -177,6 +274,18 @@ export default function CheckersGame() {
           <div className={`current-player ${gameState.currentPlayer}`}>
             Current Player: {gameState.currentPlayer.toUpperCase()}
           </div>
+          
+          {gameState.selectedPiece && (
+            <div style={{ 
+              marginTop: '10px', 
+              padding: '8px', 
+              background: 'rgba(0, 255, 0, 0.1)', 
+              borderRadius: '4px',
+              fontSize: '12px'
+            }}>
+              Selected: {gameState.selectedPiece}
+            </div>
+          )}
         </div>
       </div>
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
